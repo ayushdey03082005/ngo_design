@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChainGive - On-Chain Proof of Donations</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        .wallet-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .wallet-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: white;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1rem;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dashboard {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        .dashboard-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: white;
+        }
+
+        .card-icon {
+            width: 24px;
+            height: 24px;
+            color: #ff6b6b;
+        }
+
+        .card-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-description {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .donation-form {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: white;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .transactions-list {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.3s;
+        }
+
+        .transaction-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .transaction-info {
+            flex: 1;
+        }
+
+        .transaction-ngo {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .transaction-date {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .transaction-amount {
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+
+        .nft-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .nft-badge-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nft-badge-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .nft-badge-description {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .report-upload {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            color: white;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .report-upload:hover {
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .upload-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            color: #ff6b6b;
+        }
+
+        .spending-report {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .report-title {
+            color: white;
+            font-weight: 600;
+        }
+
+        .report-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-verified {
+            background: #4ecdc4;
+            color: white;
+        }
+
+        .status-pending {
+            background: #f39c12;
+            color: white;
+        }
+
+        .report-meta {
+            display: flex;
+            gap: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .verification-link {
+            color: #4ecdc4;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .verification-link:hover {
+            text-decoration: underline;
+        }
+
+        .floating-action {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .floating-action:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="logo">
+                <svg class="card-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                ChainGive
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#donate">Donate</a></li>
+                <li><a href="#ngos">NGOs</a></li>
+                <li><a href="#about">About</a></li>
+            </ul>
+            <button class="wallet-btn" onclick="connectWallet()">Connect Wallet</button>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Transparent Giving, Verified Impact</h1>
+        <p>Every donation tracked on-chain. Every expenditure verified. Every contribution recognized with immutable proof.</p>
+        
+        <div class="hero-stats">
+            <div class="stat-item">
+                <span class="stat-number">$2.4M</span>
+                <span class="stat-label">Total Donations</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">156</span>
+                <span class="stat-label">Verified NGOs</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">1,243</span>
+                <span class="stat-label">Donors</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">892</span>
+                <span class="stat-label">Spending Reports</span>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('donor')">Donor Dashboard</button>
+            <button class="tab" onclick="switchTab('ngo')">NGO Dashboard</button>
+            <button class="tab" onclick="switchTab('donate')">Make Donation</button>
+        </div>
+
+        <!-- Donor Dashboard -->
+        <div id="donor" class="tab-content active">
+            <div class="dashboard">
+                <div class="dashboard-header">
+                    <h2 class="dashboard-title">Donor Dashboard</h2>
+                    <button class="primary-btn" style="width: auto;" onclick="showModal('donation-modal')">New Donation</button>
+                </div>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Total Donated</span>
+                            <svg class="card-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                            </svg>
+                        </div>
+                        <div class="card-value">$1,250</div>
+                        <div class="card-description">Across 8 verified NGOs</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Recognition Badges</span>
+                            <svg class="card-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        </div>
+                        <div class="card-value">12</div>
+                        <div class="card-description">Soulbound NFTs earned</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Verified Reports</span>
+                            <svg class="card-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div class="card-value">24</div>
+                        <div class="card-description">Impact reports viewed</div>
+                    </div>
+                </div>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Recent Donations</span>
+                        </div>
+                        <div class="transactions-list">
+                            <div class="transaction-item">
+                                <div class="transaction-info">
+                                    <div class="transaction-ngo">Clean Water Initiative</div>
+                                    <div class="transaction-date">Jan 15, 2025</div>
+                                </div>
+                                <div class="transaction-amount">$150</div>
+                            </div>
+                            <div class="transaction-item">
+                                <div class="transaction-info">
+                                    <div class="transaction-ngo">Education for All</div>
+                                    <div class="transaction-date">Jan 10, 2025</div>
+                                </div>
+                                <div class="transaction-amount">$200</div>
+                            </div>
+                            <div class="transaction-item">
+                                <div class="transaction-info">
+                                    <div class="transaction-ngo">Food Security Fund</div>
+                                    <div class="transaction-date">Jan 8, 2025</div>
+                                </div>
+                                <div class="transaction-amount">$75</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">My NFT Badges</span>
+                        </div>
+                        <div class="nft-badge">
+                            <div class="nft-badge-icon">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                            </div>
+                            <div class="nft-badge-title">Generous Donor</div>
+                            <div class="nft-badge-description">$1000+ donated</div>
+                        </div>
+                        <div class="nft-badge">
+                            <div class="nft-badge-icon">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                            </div>
+                            <div class="nft-badge-title">First Donor</div>
+                            <div class="nft-badge-description">Clean Water Initiative</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NGO Dashboard -->
+        <div id="ngo" class="tab-content">
+            <div class="dashboard">
+                <div class="dashboard-header">
+                    <h2 class="dashboard-title">NGO Dashboard</h2>
+                    <button class="primary-btn" style="width: auto;" onclick="showModal('report-modal')">Upload Report</button>
+                </div>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Total Received</span>
+                            <svg class="card-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                            </svg>
+                        </div>
+                        <div class="card-value">$45,200</div>
+                        <div class="card-description">From 156 unique donors</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Active Projects</span>
+                            <svg class="card-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        </div>
+                        <div class="card-value">5</div>
+                        <div class="card-description">Currently funded</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Reports Submitted</span>
+                            <svg class="card-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div class="card-value">18</div>
+                        <div class="card-description">All verified on IPFS</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Recent Spending Reports</span>
+                    </div>
+                    <div class="spending-report">
+                        <div class="report-header">
+                            <div class="report-title">Q4 2024 Impact Report</div>
+                            <span class="report-status status-verified">Verified</span>
+                        </div>
+                        <div class="report-meta">
+                            <span>Uploaded: Jan 12, 2025</span>
+                            <span>•</span>
+                            <span>Amount: $12,500</span>
+                            <span>•</span>
+                            <a href="#" class="verification-link">View on IPFS</a>
+                        </div>
+                    </div>
+                    <div class="spending-report">
+                        <div class="report-header">
+                            <div class="report-title">December 2024 Expenses</div>
+                            <span class="report-status status-pending">Pending</span>
+                        </div>
+                        <div class="report-meta">
+                            <span>Uploaded: Jan 5, 2025</span>
+                            <span>•</span>
+                            <span>Amount: $8,300</span>
+                            <span>•</span>
+                            <a href="#" class="verification-link">View on IPFS</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Donation Form -->
+        <div id="donate" class="tab-content">
+            <div class="dashboard">
+                <div class="dashboard-header">
+                    <h2 class="dashboard-title">Make a Donation</h2>
+                </div>
+
+                <div class="donation-form">
+                    <div class="form-group">
+                        <label class="form-label">Select NGO</label>
+                        <select class="form-select">
+                            <option>Choose a verified NGO...</option>
+                            <option>Clean Water Initiative</option>
+                            <option>Education for All</option>
+                            <option>Food Security Fund</option>
+                            <option>Healthcare Access</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Donation Amount</label>
+                        <input type="number" class="form-input" placeholder="Enter amount in USD" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Cryptocurrency</label>
+                        <select class="form-select">
+                            <option>ICP</option>
+                            <option>ETH</option>
+                            <option>BTC</option>
+                            <option>USDC</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Message (Optional)</label>
+                        <input type="text" class="form-input" placeholder="Add a message to your donation" />
+                    </div>
+
+                    <button class="primary-btn" onclick="processDonation()">Donate Now</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donation Modal -->
+    <div id="donation-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Quick Donation</h3>
+                <button class="close-btn" onclick="hideModal('donation-modal')">&times;</button>
+            </div>
+            <div class="donation-form">
+                <div class="form-group">
+                    <label class="form-label">Select NGO</label>
+                    <select class="form-select">
+                        <option>Choose a verified NGO...</option>
+                        <option>Clean Water Initiative</option>
+                        <option>Education for All</option>
+                        <option>Food Security Fund</option>
+                        <option>Healthcare Access</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Donation Amount</label>
+                    <input type="number" class="form-input" placeholder="Enter amount in USD" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Cryptocurrency</label>
+                    <select class="form-select">
+                        <option>ICP</option>
+                        <option>ETH</option>
+                        <option>BTC</option>
+                        <option>USDC</option>
+                    </select>
+                </div>
+
+                <button class="primary-btn" onclick="processDonation()">Donate Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Upload Modal -->
+    <div id="report-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Upload Spending Report</h3>
+                <button class="close-btn" onclick="hideModal('report-modal')">&times;</button>
+            </div>
+            <div class="report-upload" onclick="document.getElementById('file-input').click()">
+                <svg class="upload-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                </svg>
+                <h4>Upload Report Document</h4>
+                <p>Click to select or drag and drop your spending report</p>
+                <input type="file" id="file-input" style="display: none;" accept=".pdf,.doc,.docx">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Report Title</label>
+                <input type="text" class="form-input" placeholder="e.g., Q1 2025 Impact Report" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Amount Covered</label>
+                <input type="number" class="form-input" placeholder="Total amount in this report" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Report Period</label>
+                <input type="text" class="form-input" placeholder="e.g., January 2025" />
+            </div>
+            <button class="primary-btn" onclick="uploadReport()">Upload to IPFS</button>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="floating-action" onclick="showModal('donation-modal')">
+        <svg viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+        </svg>
+    </button>
+
+    <script>
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        // Modal functionality
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function hideModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        // Wallet connection
+        function connectWallet() {
+            // Simulate wallet connection
+            const walletBtn = document.querySelector('.wallet-btn');
+            walletBtn.textContent = 'Connecting...';
+            walletBtn.disabled = true;
+            
+            setTimeout(() => {
+                walletBtn.textContent = '0x1234...5678';
+                walletBtn.disabled = false;
+                walletBtn.style.background = 'linear-gradient(135deg, #4ecdc4, #44a08d)';
+            }, 2000);
+        }
+
+        // Process donation
+        function processDonation() {
+            const btn = event.target;
+            const originalText = btn.textContent;
+            
+            btn.textContent = 'Processing...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.textContent = 'Transaction Complete!';
+                btn.style.background = 'linear-gradient(135deg, #4ecdc4, #44a08d)';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                    btn.style.background = 'linear-gradient(135deg, #ff6b6b, #ee5a24)';
+                    hideModal('donation-modal');
+                    
+                    // Show success notification
+                    showNotification('Donation successful! NFT badge minted to your wallet.', 'success');
+                }, 2000);
+            }, 3000);
+        }
+
+        // Upload report
+        function uploadReport() {
+            const btn = event.target;
+            const originalText = btn.textContent;
+            
+            btn.textContent = 'Uploading to IPFS...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.textContent = 'Report Uploaded!';
+                btn.style.background = 'linear-gradient(135deg, #4ecdc4, #44a08d)';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                    btn.style.background = 'linear-gradient(135deg, #ff6b6b, #ee5a24)';
+                    hideModal('report-modal');
+                    
+                    // Show success notification
+                    showNotification('Report uploaded successfully and hashed on-chain!', 'success');
+                }, 2000);
+            }, 3000);
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'linear-gradient(135deg, #4ecdc4, #44a08d)' : 'linear-gradient(135deg, #ff6b6b, #ee5a24)'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 10px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                z-index: 10000;
+                animation: slideIn 0.3s ease-out;
+                max-width: 300px;
+                backdrop-filter: blur(10px);
+            `;
+            
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 4000);
+        }
+
+        // File input handling
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const uploadArea = document.querySelector('.report-upload');
+                uploadArea.innerHTML = `
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                    </svg>
+                    <h4>File Selected: ${file.name}</h4>
+                    <p>Ready to upload to IPFS</p>
+                `;
+                uploadArea.style.border = '2px solid #4ecdc4';
+                uploadArea.style.background = 'rgba(78, 205, 196, 0.1)';
+            }
+        });
+
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize demo data updates
+        function updateStats() {
+            const stats = document.querySelectorAll('.stat-number');
+            stats.forEach(stat => {
+                const currentValue = parseFloat(stat.textContent.replace(/[^0-9.]/g, ''));
+                const increment = Math.random() * 0.1;
+                
+                if (stat.textContent.includes('M')) {
+                    stat.textContent = (currentValue + increment).toFixed(1) + 'M';
+                } else {
+                    stat.textContent = Math.floor(currentValue + increment).toString();
+                }
+            });
+        }
+
+        // Update stats every 10 seconds for demo
+        setInterval(updateStats, 10000);
+
+        // Add hover effects to transaction items
+        document.querySelectorAll('.transaction-item').forEach(item => {
+            item.addEventListener('click', function() {
+                showNotification('Opening transaction details...', 'info');
+            });
+        });
+
+        // Add click handlers for NFT badges
+        document.querySelectorAll('.nft-badge').forEach(badge => {
+            badge.addEventListener('click', function() {
+                showNotification('Opening NFT details in wallet...', 'info');
+            });
+        });
+
+        // Add click handlers for verification links
+        document.querySelectorAll('.verification-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                showNotification('Opening IPFS verification...', 'info');
+            });
+        });
+    </script>
+</body>
+</html>
